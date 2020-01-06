@@ -4,21 +4,32 @@ import Home from '../views/Home.vue'
 
 Vue.use(VueRouter)
 
-const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: Home
-  }
+const routes = [{
+        path: '/',
+        name: 'home',
+        component: Home
+    },
+    {
+        path: '/login',
+        name: 'login',
+        component: () =>
+            import ("../views/login/login")
+    },
+    {
+        path: '/register',
+        name: 'register',
+        component: () =>
+            import ("../views/register/register")
+    }
 ]
 
 const isPro = process.env.NODE_ENV === 'production'
 
 
 const router = new VueRouter({
-  mode: isPro ? 'hash' : 'history',
-  base: process.env.BASE_URL,
-  routes
+    mode: isPro ? 'hash' : 'history',
+    base: process.env.BASE_URL,
+    routes
 })
 
 export default router

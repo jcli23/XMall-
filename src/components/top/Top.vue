@@ -14,8 +14,8 @@
           </div>
           <div class="right_right" :class="{'right_right_after':searchBarFixed}">
             <div @mouseenter="mouseenter" @mouseleave="mouseleave" class="left">
-              <img class="user" v-if="enter===false" src="../images/user_befor.png" alt />
-              <img class="user" v-if="enter===true" src="../images/user_last.png" alt />
+              <img class="user" v-if="enter===false" src="../images/user_befor.png" @click="login" alt />
+              <img class="user" v-if="enter===true" src="../images/user_last.png" @click="login" alt />
             </div>
             <div class="right">
               <div class="cart_icon" @mouseenter="mouseenter1" @mouseleave="mouseleave1">
@@ -56,6 +56,9 @@ export default {
     },
     mouseleave1() {
       this.enter1 = false;
+    },
+    login(){
+      this.$router.push('/login')
     },
     handleScroll() {
       let scrollTop =
