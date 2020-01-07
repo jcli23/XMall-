@@ -16,6 +16,15 @@
             <div @mouseenter="mouseenter" @mouseleave="mouseleave" class="left">
               <img class="user" v-if="enter===false" src="../images/user_befor.png" @click="login" alt />
               <img class="user" v-if="enter===true" src="../images/user_last.png" @click="login" alt />
+              <div v-if="user!==null&enter===true" class="userbox">
+                <div class="information">
+                  <img src="../../components/images/icon.png" alt="">
+                  <div class="username">{{user.username}}</div>
+                </div>
+                <div v-for="(item,index) in firstList" :key="index" class="for">
+                     <div class="name">{{item.name}}</div>
+                  </div>
+              </div>
             </div>
             <div class="right">
               <div class="cart_icon" @mouseenter="mouseenter1" @mouseleave="mouseleave1">
@@ -40,7 +49,35 @@ export default {
       searchBarFixed: false,
       enter: false,
       enter1: false,
-      count: 0
+      count: 0,
+      user:{},
+      user:null,
+      firstList: [
+        {
+          name: "我的订单",
+          path: "/order"
+        },
+        {
+          name: "账号资料",
+          path: "/order"
+        },
+        {
+          name: "收货地址",
+          path: "/order"
+        },
+        {
+          name: "售后服务",
+          path: "/order"
+        },
+        {
+          name: "我的优惠",
+          path: "/order"
+        },
+        {
+          name: "退出",
+          path: "/order"
+        }
+      ]
     };
   },
   components: {},
@@ -74,6 +111,11 @@ export default {
   },
   mounted() {
     window.addEventListener("scroll", this.handleScroll);
+    let user=localStorage.getItem('user')
+    if(user){
+      this.user=JSON.parse(user)
+      console.log(this.user)
+    }
   },
   watch: {},
   computed: {}
@@ -147,9 +189,49 @@ export default {
           width: 20px;
           height: 20px;
           margin-left: 50px;
+          position: relative;
           .user {
             width: 20px;
             height: 20px;
+          }
+          .userbox{
+            position: absolute;
+            top: 43px;
+            right: -45px;
+            z-index: 500;
+            width: 120px;
+            background: white;
+            border: 1px solid #b3b3b3;
+            border-radius: 10px;
+            .information{
+              width: 100%;
+              height: 120px;
+              img{
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                margin-left: 20px;
+              }
+              .username{
+                height: 30px;
+                width: 100%;
+                text-align: center;
+                line-height: 30px;
+                font-size: 14px;
+              }
+            }
+            .for{
+              width: 100%;
+              height: 35px;
+              border-top: 1px solid #eeeeee;
+              .name{
+                width: 100%;
+                height: 35px;
+                text-align: center;
+                font-size: 13px;
+                line-height: 35px;
+              }
+            }
           }
         }
         .right {

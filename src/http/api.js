@@ -11,10 +11,15 @@ export default {
     },
     //所有商品
     getGoods({ page, size, sort, priceGt, priceLte }) {
-        if (sort) {
+        if (sort && priceGt && priceLte) {
+            return service.req(`goods/allGoods?page=${page}&size=${size}&sort=${sort}&priceGt=${priceGt}&priceLte=${priceLte}`)
+        } else if (priceGt && priceLte) {
+            return service.req(`goods/allGoods?page=${page}&size=${size}&priceGt=${priceGt}&priceLte=${priceLte}`)
+        } else if (sort) {
             return service.req(`goods/allGoods?page=${page}&size=${size}&sort=${sort}`)
+        } else {
+            return service.req(`goods/allGoods?page=${page}&size=${size}`)
         }
-        return service.req(`goods/allGoods?page=${page}&size=${size}`)
     },
     //搜索商品
     getSearch(keyword) {

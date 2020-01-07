@@ -1,13 +1,38 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import Common from '../views/common/common'
 
 Vue.use(VueRouter)
 
 const routes = [{
         path: '/',
-        name: 'home',
-        component: Home
+        redirect: "/home"
+    },
+    {
+        path: '/home',
+        component: Common,
+        children: [{
+            path: "",
+            name: "home",
+            component: Home,
+            meta: {
+                title: '首页'
+            }
+        }]
+    },
+    {
+        path: '/goods',
+        component: Common,
+        children: [{
+            path: "",
+            name: "goods",
+            component: () =>
+                import ('../views/goods/goods'),
+            meta: {
+                title: '商品'
+            }
+        }]
     },
     {
         path: '/login',
