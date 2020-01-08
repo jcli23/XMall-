@@ -40,16 +40,16 @@ export default {
         })
     },
     //加入购物车
-    addCart(productId) {
-        return service.req('goods/addCart', productId)
+    addCart({ productId }) {
+        return service.req('goods/addCart', { productId })
     },
     //查询购物车
     getCarts() {
         return service.req('goods/getCarts')
     },
     //删除购物车商品
-    delCart(productId) {
-        return service.req('goods/delCart', productId)
+    delCart({ productId }) {
+        return service.req('goods/delCart', { productId })
     },
     //修改购物车数量
     editCart({ productId, count }) {

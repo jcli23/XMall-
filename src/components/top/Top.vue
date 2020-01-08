@@ -32,7 +32,7 @@
                 <img class="cart" v-if="enter1===true" src="../images/cart_last.png" alt />
               </div>
               <div class="count">
-                <div class="font">{{count}}</div>
+                <div class="font" id="buycar">{{count}}</div>
               </div>
             </div>
           </div>
@@ -95,14 +95,18 @@ export default {
       this.enter1 = false;
     },
     login(){
-      this.$router.push('/login')
+      if(localStorage.getItem("user")){
+        this.$router.push('/user')
+      }else{
+        this.$router.push('/login')
+      }
     },
     handleScroll() {
       let scrollTop =
         window.pageYOffset ||
         document.documentElement.scrollTop ||
         document.body.scrollTop;
-      if (scrollTop > 100) {
+      if (scrollTop >= 100) {
         this.searchBarFixed = true;
       } else {
         this.searchBarFixed = false;

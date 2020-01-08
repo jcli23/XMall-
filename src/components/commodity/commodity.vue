@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="{'all2':searchBarFixed===true}">
     <div class="all">
       <div class="warp">
         <div class="font1" :class="{'color':num===0}" @click="comprehensive">综合排序</div>
@@ -20,15 +20,26 @@
           :key="index"
           class="for"
         >
-          <img :src="item.productImageBig" alt />
+          <img :src="item.productImageBig" class="img" alt />
           <div class="font1">{{item.productName}}</div>
           <div class="font2">{{item.subTitle}}</div>
           <div class="price">
             <div class="look">查看详情</div>
-            <div class="add">加入购物车</div>
+            <div class="add" @click="add(item.productImageBig,item.productId)">加入购物车</div>
             <div class="font">￥{{item.salePrice.toFixed(2)}}</div>
           </div>
         </div>
+        <transition
+            appear
+            @before-appear="beforeEnter"
+            @after-appear="afterEnter"
+            v-for="(item,index) in showMoveDot"
+            :key="index.id"
+          >
+            <div class="move_dot" ref="ball" v-if="item">
+              <img :src="dropImage" alt="">
+            </div>
+          </transition>
       </div>
     </div>
     <div class="pages">
@@ -62,7 +73,13 @@ export default {
       page_size: 6,
       size: 30,
       num: 0,
-      goods: []
+      searchBarFixed:false,
+      addlock: false,
+      addcart: null,
+      goods: [],
+      showMoveDot: [], //控制下落的小圆点显示隐藏
+      elLeft: 0, //当前点击购物车按钮在网页中的绝对top值
+      elTop: 0 //当前点击购物车按钮在网页中的绝对left值
     };
   },
   components: {},
@@ -72,9 +89,14 @@ export default {
     },
     hign() {
       this.num = 1;
-        this.$api
-        .getGoods({ page: this.page, size: this.size, sort: 1,priceGt: Number(this.lowprice),
-          priceLte: Number(this.highprice)})
+      this.$api
+        .getGoods({
+          page: this.page,
+          size: this.size,
+          sort: 1,
+          priceGt: Number(this.lowprice),
+          priceLte: Number(this.highprice)
+        })
         .then(res => {
           // console.log(res)
           this.goods = res.data;
@@ -86,13 +108,18 @@ export default {
         });
     },
     low() {
-      console.log(this.lowprice,111)
+      console.log(this.lowprice, 111);
       this.num = 2;
-      let lowprice= Number(this.lowprice);
-      let highprice=Number(this.highprice)
-        this.$api
-        .getGoods({ page: this.page, size: this.size, sort: -1,priceGt: lowprice,
-          priceLte:highprice})
+      let lowprice = Number(this.lowprice);
+      let highprice = Number(this.highprice);
+      this.$api
+        .getGoods({
+          page: this.page,
+          size: this.size,
+          sort: -1,
+          priceGt: lowprice,
+          priceLte: highprice
+        })
         .then(res => {
           // console.log(res)
           this.goods = res.data;
@@ -126,6 +153,56 @@ export default {
     },
     change_size(e) {
       this.page_size = e;
+    },
+    handleScroll() {
+      let scrollTop =
+        window.pageYOffset ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+      if (scrollTop >=                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       100) {
+        this.searchBarFixed = true;
+      } else {
+        this.searchBarFixed = false;
+      }
+    },
+    add(e,id) {
+      this.dropImage = e;
+      console.log(id)
+      this.$api.addCart({productId:id}).then(res=>{
+        console.log(res)
+      })
+      this.showMoveDot = [...this.showMoveDot, true];
+      this.elLeft = event.target.getBoundingClientRect().left;
+      this.elTop = event.target.getBoundingClientRect().top;
+      console.log(this.elLeft, 1);
+      console.log(this.elTop, 2);
+
+    },
+    beforeEnter(el) {
+      // 设置transform值
+      el.style.transform = `translate3d(${this.elLeft}px,${
+        this.elTop-235
+      }px , 0)`;
+      // 设置透明度
+      el.style.opacity = 0;
+    },
+    afterEnter(el) {
+      // 获取底部购物车徽标
+      const badgePosition = document
+        .getElementById("buycar")
+        .getBoundingClientRect();
+      // 设置小球移动的位移
+      console.log(badgePosition.left, badgePosition.top);
+      el.style.transform = `translate3d(${badgePosition.left-90}px,${
+        badgePosition.top-220
+      }px,0)`;
+      // 增加贝塞尔曲线
+      el.style.transition =
+        "transform .88s cubic-bezier(0.3, -0.25, 0.7, -0.15)";
+      el.style.transition = "transform .88s linear";
+      this.showMoveDot = this.showMoveDot.map(item => false);
+      // 设置透明度
+      el.style.opacity = 1;
     }
   },
   mounted() {
@@ -140,6 +217,7 @@ export default {
       .catch(err => {
         console.log(err);
       });
+    window.addEventListener("scroll", this.handleScroll);  
   },
   watch: {},
   computed: {}
@@ -212,6 +290,9 @@ export default {
     }
   }
 }
+.all2{
+  padding-top: 60px;
+}
 .goods {
   width: 100%;
   background: #f2f2f2;
@@ -219,11 +300,22 @@ export default {
     display: flex;
     flex-wrap: wrap;
     background: white;
+    .move_dot {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      z-index: 999;
+        img {
+          width: 30px;
+          height: 30px;
+        }
+    }
     .for {
       width: 25%;
       height: 428px;
       border: 1px solid #f2f2f2;
-      img {
+      position: relative;
+      .img {
         width: 206px;
         height: 206px;
         margin: 50px 49.25px 10px;
@@ -269,6 +361,7 @@ export default {
           text-align: center;
           line-height: 30px;
           color: white;
+          // z-index: 999;
           font-size: 13px;
           margin-left: 10px;
           border: 1px solid #dddcdc;
