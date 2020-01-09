@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Common from '../views/common/common'
-
+import user from '../views/my/my'
 Vue.use(VueRouter)
 
 const routes = [{
@@ -15,10 +15,7 @@ const routes = [{
         children: [{
             path: "",
             name: "home",
-            component: Home,
-            meta: {
-                title: '首页'
-            }
+            component: Home
         }]
     },
     {
@@ -28,10 +25,7 @@ const routes = [{
             path: "",
             name: "goods",
             component: () =>
-                import ('../views/goods/goods'),
-            meta: {
-                title: '商品'
-            }
+                import ('../views/goods/goods')
         }]
     },
     {
@@ -45,6 +39,22 @@ const routes = [{
         name: 'user',
         component: () =>
             import ("../views/my/my")
+    },
+    {
+        path: '/cart',
+        name: 'cart',
+        component: () =>
+            import ("../views/cart/cart")
+    },
+    {
+        path: '/my_order',
+        component: user,
+        children: [{
+            path: "",
+            name: "my_order",
+            component: () =>
+                import ('../views/my_order/my_order')
+        }]
     },
     {
         path: '/register',

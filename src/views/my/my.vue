@@ -5,7 +5,7 @@
      <div class="warp">
        <avatarer class="avatarer"></avatarer>
        <div class="right">
-         
+         <router-view></router-view>
        </div>
      </div>
    </div>

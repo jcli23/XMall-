@@ -14,25 +14,95 @@
           </div>
           <div class="right_right" :class="{'right_right_after':searchBarFixed}">
             <div @mouseenter="mouseenter" @mouseleave="mouseleave" class="left">
-              <img class="user" v-if="enter===false" src="../images/user_befor.png" @click="login" alt />
-              <img class="user" v-if="enter===true" src="../images/user_last.png" @click="login" alt />
+              <img
+                class="user"
+                v-if="enter===false"
+                src="../images/user_befor.png"
+                @click="login"
+                alt
+              />
+              <img
+                class="user"
+                v-if="enter===true"
+                src="../images/user_last.png"
+                @click="login"
+                alt
+              />
               <div v-if="user!==null&enter===true" class="userbox">
                 <div class="information">
-                  <img src="../../components/images/icon.png" alt="">
+                  <img src="../../components/images/icon.png" alt />
                   <div class="username">{{user.username}}</div>
                 </div>
                 <div v-for="(item,index) in firstList" :key="index" class="for">
-                     <div class="name">{{item.name}}</div>
-                  </div>
+                  <div class="name">{{item.name}}</div>
+                </div>
               </div>
             </div>
             <div class="right">
               <div class="cart_icon" @mouseenter="mouseenter1" @mouseleave="mouseleave1">
                 <img class="cart" v-if="enter1===false" src="../images/cart_befor.png" alt />
-                <img class="cart" v-if="enter1===true" src="../images/cart_last.png" alt />
+                <img class="cart" v-if="enter1===true" src="../images/cart_last.png" @click="gotocart" alt />
+                <img
+                  class="sanjiao"
+                  v-if="entercart===true"
+                  src="../../components/images/sanjiao.png"
+                  alt
+                />
+                <div class="carbox" v-if="entercart===true" @mouseleave="mouseleave2">
+                  <div class="box">
+                    <div v-if="length<4">
+                      <div v-for="(item,index) in goods" :key="index" class="for">
+                        <div class="img">
+                          <img :src="item.productImageBig" alt />
+                        </div>
+                        <div class="rightbox">
+                          <div class="name">{{item.productName}}</div>
+                          <div class="total">
+                            <div class="price">￥{{item.salePrice}}</div>
+                            <div class="count">X{{item.count}}</div>
+                          </div>
+                        </div>
+                        <div class="del">
+                          <img src="../../components/images/del.png" alt />
+                        </div>
+                      </div>
+                    </div>
+                    <div v-else>
+                      <Scroll  height="480">
+                        <div v-for="(item,index) in goods" :key="index" class="for">
+                          <div class="img">
+                            <img :src="item.productImageBig" alt />
+                          </div>
+                          <div class="rightbox">
+                            <div class="name">{{item.productName}}</div>
+                            <div class="total">
+                              <div class="price">￥{{item.salePrice}}</div>
+                              <div class="count">X{{item.count}}</div>
+                            </div>
+                          </div>
+                          <div class="del" @click="delgoods(item._id)">
+                            <img src="../../components/images/del.png" alt />
+                          </div>
+                        </div>
+                      </Scroll>
+                    </div>
+                  </div>
+                  <div class="bottom">
+                    <div class="lefter">
+                      <div class="totalcount">共{{count}}件商品</div>
+                      <div class="bottom">
+                        <div class="font">合计:</div>
+                        <div class="totalprice">￥{{totalprice}}</div>
+                      </div>
+                    </div>
+                    <div class="righter">
+                      <div class="button" @click="gotocart">去购物车</div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="count">
-                <div class="font" id="buycar">{{count}}</div>
+                <div class="font" :class="{'red':count!==0}" id="buycar">{{count}}</div>
               </div>
             </div>
           </div>
@@ -48,10 +118,10 @@ export default {
     return {
       searchBarFixed: false,
       enter: false,
+      entercart: false,
       enter1: false,
-      count: 0,
-      user:{},
-      user:null,
+      user: {},
+      user: null,
       firstList: [
         {
           name: "我的订单",
@@ -90,16 +160,23 @@ export default {
     },
     mouseenter1() {
       this.enter1 = true;
+      this.entercart = true;
     },
     mouseleave1() {
       this.enter1 = false;
     },
-    login(){
-      if(localStorage.getItem("user")){
-        this.$router.push('/user')
-      }else{
-        this.$router.push('/login')
+    mouseleave2() {
+      this.entercart = false;
+    },
+    login() {
+      if (localStorage.getItem("user")) {
+        this.$router.push("/my_order");
+      } else {
+        this.$router.push("/login");
       }
+    },
+    gotocart(){
+      this.$router.push('/cart')
     },
     handleScroll() {
       let scrollTop =
@@ -111,18 +188,62 @@ export default {
       } else {
         this.searchBarFixed = false;
       }
+    },
+    delgoods(id) {
+      this.$api.delCart({ productId: id }).then(res => {
+        console.log(res);
+        this.$api.getCarts().then(res => {
+          this.$store.state.length= res.data.length;
+          this.$store.state.goods = res.data;
+          // console.log(this.goods);
+          let count=0;
+          let totalprice = 0;
+          res.data.map(item => {
+            count += item.count;
+            totalprice += item.count * item.salePrice;
+          });
+          this.$store.state.count = count;
+          this.$store.state.totalprice = totalprice;
+        });
+      });
     }
   },
   mounted() {
     window.addEventListener("scroll", this.handleScroll);
-    let user=localStorage.getItem('user')
-    if(user){
-      this.user=JSON.parse(user)
-      console.log(this.user)
+    let user = localStorage.getItem("user");
+    if (user) {
+      this.user = JSON.parse(user);
+      console.log(this.user);
     }
+    this.$api.getCarts().then(res => {
+      this.$store.state.length= res.data.length;
+          this.$store.state.goods = res.data;
+          // console.log(this.goods);
+          let count=0;
+          let totalprice = 0;
+          res.data.map(item => {
+            count += item.count;
+            totalprice += item.count * item.salePrice;
+          });
+          this.$store.state.count = count;
+          this.$store.state.totalprice = totalprice;
+    });
   },
   watch: {},
-  computed: {}
+  computed: {
+    count() {
+      return this.$store.state.count;
+    },
+    length(){
+      return this.$store.state.length;
+    },
+    goods(){
+      return this.$store.state.goods;
+    },
+    totalprice(){
+      return this.$store.state.totalprice;
+    }
+  }
 };
 </script>
 
@@ -198,7 +319,7 @@ export default {
             width: 20px;
             height: 20px;
           }
-          .userbox{
+          .userbox {
             position: absolute;
             top: 43px;
             right: -45px;
@@ -207,16 +328,16 @@ export default {
             background: white;
             border: 1px solid #b3b3b3;
             border-radius: 10px;
-            .information{
+            .information {
               width: 100%;
               height: 120px;
-              img{
+              img {
                 width: 80px;
                 height: 80px;
                 border-radius: 50%;
                 margin-left: 20px;
               }
-              .username{
+              .username {
                 height: 30px;
                 width: 100%;
                 text-align: center;
@@ -224,11 +345,11 @@ export default {
                 font-size: 14px;
               }
             }
-            .for{
+            .for {
               width: 100%;
               height: 35px;
               border-top: 1px solid #eeeeee;
-              .name{
+              .name {
                 width: 100%;
                 height: 35px;
                 text-align: center;
@@ -245,9 +366,151 @@ export default {
           .cart_icon {
             width: 30px;
             height: 30px;
+            position: relative;
             .cart {
               width: 30px;
               height: 30px;
+            }
+            .sanjiao {
+              width: 30px;
+              height: 30px;
+              position: absolute;
+              top: 40px;
+              right: 0;
+              z-index: 601;
+            }
+            .carbox {
+              width: 380px;
+              min-height: 300px;
+              max-width: 700px;
+              background: white;
+              position: absolute;
+              top: 60px;
+              right: -40px;
+              z-index: 600;
+              overflow: hidden;
+              border-radius: 5px;
+              box-shadow: 0 0 20px #cfcece;
+              .box {
+                width: 100%;
+                .for {
+                  width: 100%;
+                  position: relative;
+                  height: 120px;
+                  padding: 15px 20px;
+                  border-bottom: 1px solid #f2f2f2;
+                  display: flex;
+                  align-items: center;
+                  .img {
+                    width: 80px;
+                    height: 80px;
+                    border: 1px solid #f2f2f2;
+                    img {
+                      width: 100%;
+                      height: 100%;
+                    }
+                  }
+                  .rightbox {
+                    margin-left: 20px;
+                    width: 220px;
+                    height: 80px;
+                    padding: 0 15px 0 0;
+                    .name {
+                      height: 30px;
+                      margin-top: 10px;
+                      line-height: 30px;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    }
+                    .total {
+                      display: flex;
+                      height: 30px;
+                      margin-top: 10px;
+                      align-items: center;
+                      .price {
+                        color: rgb(250, 36, 36);
+                        padding: 0 5px;
+                        font-size: 14px;
+                        font-weight: 700;
+                      }
+                      .count {
+                        color: #999;
+                        padding: 0 10px;
+                        font-size: 12px;
+                      }
+                    }
+                  }
+                  .del {
+                    position: absolute;
+                    width: 20px;
+                    right: 20px;
+                    top: 50px;
+                    height: 20px;
+                    display: none;
+                    border-radius: 50%;
+                    overflow: hidden;
+                    border: 1px solid #b9b9c4;
+                    &:hover {
+                      background: #f2f2f2;
+                    }
+                    img {
+                      margin-left: 4px;
+                      width: 10px;
+                      height: 10px;
+                    }
+                  }
+                  &:hover {
+                    background: #fcfafa;
+                    .del {
+                      display: block;
+                    }
+                  }
+                }
+              }
+            }
+            .bottom {
+              width: 100%;
+              height: 100px;
+              display: flex;
+              align-items: center;
+              .lefter {
+                width: 55%;
+                height: 100px;
+                padding: 15px 20px;
+                .totalcount {
+                  height: 30px;
+                  line-height: 30px;
+                  font-size: 13px;
+                  color: #999;
+                }
+                .bottom {
+                  height: 40px;
+                  display: flex;
+                  align-items: center;
+                  .totalprice {
+                    color: rgb(247, 48, 48);
+                    font-size: 16px;
+                    font-weight: 700;
+                    padding-left: 10px;
+                  }
+                }
+              }
+              .righter {
+                width: 40%;
+                height: 100px;
+                display: flex;
+                align-items: center;
+                .button {
+                  width: 120px;
+                  height: 50px;
+                  line-height: 50px;
+                  text-align: center;
+                  background: #4336f3;
+                  color: white;
+                  border-radius: 5px;
+                }
+              }
             }
           }
         }
@@ -262,6 +525,9 @@ export default {
             line-height: 20px;
             color: white;
             border-radius: 50%;
+          }
+          .red {
+            background: red;
           }
         }
       }

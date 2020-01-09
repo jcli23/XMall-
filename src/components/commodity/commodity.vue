@@ -30,16 +30,16 @@
           </div>
         </div>
         <transition
-            appear
-            @before-appear="beforeEnter"
-            @after-appear="afterEnter"
-            v-for="(item,index) in showMoveDot"
-            :key="index.id"
-          >
-            <div class="move_dot" ref="ball" v-if="item">
-              <img :src="dropImage" alt="">
-            </div>
-          </transition>
+          appear
+          @before-appear="beforeEnter"
+          @after-appear="afterEnter"
+          v-for="(item,index) in showMoveDot"
+          :key="index.id"
+        >
+          <div class="move_dot" ref="ball" v-if="item">
+            <img :src="dropImage" alt />
+          </div>
+        </transition>
       </div>
     </div>
     <div class="pages">
@@ -73,7 +73,8 @@ export default {
       page_size: 6,
       size: 30,
       num: 0,
-      searchBarFixed:false,
+      count:0,
+      searchBarFixed: false,
       addlock: false,
       addcart: null,
       goods: [],
@@ -159,30 +160,41 @@ export default {
         window.pageYOffset ||
         document.documentElement.scrollTop ||
         document.body.scrollTop;
-      if (scrollTop >=                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       100) {
+      if (scrollTop >= 100) {
         this.searchBarFixed = true;
       } else {
         this.searchBarFixed = false;
       }
     },
-    add(e,id) {
+    add(e, id) {
       this.dropImage = e;
-      console.log(id)
-      this.$api.addCart({productId:id}).then(res=>{
-        console.log(res)
-      })
+      console.log(id);
+      this.$api.addCart({ productId: id }).then(res => {
+        // console.log(res)
+        this.$api.getCarts().then(res => {
+          this.$store.state.length= res.data.length;
+          this.$store.state.goods = res.data;
+          // console.log(this.goods);
+          let count=0;
+          let totalprice = 0;
+          res.data.map(item => {
+            count += item.count;
+            totalprice += item.count * item.salePrice;
+          });
+          this.$store.state.count = count;
+          this.$store.state.totalprice = totalprice;
+        });
+      });
       this.showMoveDot = [...this.showMoveDot, true];
       this.elLeft = event.target.getBoundingClientRect().left;
       this.elTop = event.target.getBoundingClientRect().top;
-      console.log(this.elLeft, 1);
-      console.log(this.elTop, 2);
-
+      // console.log(this.elLeft, 1);
+      // console.log(this.elTop, 2);
     },
     beforeEnter(el) {
       // 设置transform值
-      el.style.transform = `translate3d(${this.elLeft}px,${
-        this.elTop-235
-      }px , 0)`;
+      el.style.transform = `translate3d(${this.elLeft}px,${this.elTop -
+        235}px , 0)`;
       // 设置透明度
       el.style.opacity = 0;
     },
@@ -193,9 +205,8 @@ export default {
         .getBoundingClientRect();
       // 设置小球移动的位移
       console.log(badgePosition.left, badgePosition.top);
-      el.style.transform = `translate3d(${badgePosition.left-90}px,${
-        badgePosition.top-220
-      }px,0)`;
+      el.style.transform = `translate3d(${badgePosition.left -
+        90}px,${badgePosition.top - 220}px,0)`;
       // 增加贝塞尔曲线
       el.style.transition =
         "transform .88s cubic-bezier(0.3, -0.25, 0.7, -0.15)";
@@ -217,7 +228,12 @@ export default {
       .catch(err => {
         console.log(err);
       });
-    window.addEventListener("scroll", this.handleScroll);  
+    window.addEventListener("scroll", this.handleScroll);
+    this.$api.getCarts().then(res => {
+          res.data.map(item=>{
+             this.count+=item.count
+          })
+        });
   },
   watch: {},
   computed: {}
@@ -290,7 +306,7 @@ export default {
     }
   }
 }
-.all2{
+.all2 {
   padding-top: 60px;
 }
 .goods {
@@ -305,10 +321,10 @@ export default {
       width: 30px;
       height: 30px;
       z-index: 999;
-        img {
-          width: 30px;
-          height: 30px;
-        }
+      img {
+        width: 30px;
+        height: 30px;
+      }
     }
     .for {
       width: 25%;

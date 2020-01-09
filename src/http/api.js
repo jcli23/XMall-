@@ -45,7 +45,7 @@ export default {
     },
     //查询购物车
     getCarts() {
-        return service.req('goods/getCarts')
+        return service.req('goods/getCart')
     },
     //删除购物车商品
     delCart({ productId }) {
